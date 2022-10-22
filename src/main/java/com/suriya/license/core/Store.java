@@ -279,7 +279,6 @@ public class Store {
                  PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(
                          encodedPrivateKey);
                   privateKey = keyFactory.generatePrivate(privateKeySpec);
-                 publicKey.
              } catch (FileNotFoundException e) {
                  e.printStackTrace();
              } catch (IOException e) {

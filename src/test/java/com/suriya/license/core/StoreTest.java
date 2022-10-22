@@ -111,11 +111,11 @@ public class StoreTest {
      */
     @Test
     public void storeKey_Test_keyPair() throws KeyStoreException {
-        String keyPairGenAlgorithm = "DSA"; //DSA RSA
+        String keyPairGenAlgorithm = "RSA"; //DSA RSA
 //        String keyStoreGenAlgorithm = "PKCS12"; //DSA RSA
         String keyAliasName = "privateKeyAlias";
         String keyStoreFilePath = "src//test//resources//store";
-        String keyStoreFileName = "keyPair";
+        String keyStoreFileName = "rsakeyPair";
         String keyStorePass = "suriya";
 
 //        String publicKeyStoreFilePath = "src//test//resources//store";
