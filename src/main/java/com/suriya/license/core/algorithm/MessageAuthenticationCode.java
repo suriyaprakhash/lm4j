@@ -5,7 +5,7 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 
-public class MessageAuthenticationCode {
+public final class MessageAuthenticationCode {
 
     /**
      * MAC

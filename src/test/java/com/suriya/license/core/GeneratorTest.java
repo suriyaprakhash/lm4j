@@ -1,14 +1,7 @@
 package com.suriya.license.core;
 
-import com.suriya.license.core.algorithm.Hash;
-import com.suriya.license.core.algorithm.MessageAuthenticationCode;
-import com.suriya.license.core.algorithm.SymmetricKey;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.security.Key;
 
 public class GeneratorTest {
 //
@@ -46,6 +39,28 @@ public class GeneratorTest {
     @Test
     public void supportedAlgorithmTest_Mac() {
         String crypto = "Mac";
+        System.out.println("Supported " + crypto + " Algorithms :");
+        Generator.getSupportedAlgorithms(crypto).forEach(System.out::println);
+
+    }
+
+    /**
+     * Test for {@link Generator#getSupportedAlgorithms(String)} using KeyGenerator
+     */
+    @Test
+    public void supportedAlgorithmTest_KeyGenerator() {
+        String crypto = "KeyGenerator";
+        System.out.println("Supported " + crypto + " Algorithms :");
+        Generator.getSupportedAlgorithms(crypto).forEach(System.out::println);
+
+    }
+
+    /**
+     * Test for {@link Generator#getSupportedAlgorithms(String)} using KeyPairGenerator
+     */
+    @Test
+    public void supportedAlgorithmTest_KeyPairGenerator () {
+        String crypto = "KeyPairGenerator";
         System.out.println("Supported " + crypto + " Algorithms :");
         Generator.getSupportedAlgorithms(crypto).forEach(System.out::println);
 

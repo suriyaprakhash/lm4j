@@ -1,5 +1,6 @@
 package com.suriya.license.core;
 
+import com.suriya.license.core.algorithm.AsymmetricKey;
 import com.suriya.license.core.algorithm.SymmetricKey;
 import com.suriya.license.util.ConversionUtility;
 import org.junit.jupiter.api.Assertions;
@@ -7,6 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import javax.crypto.SecretKey;
 import java.security.*;
+import java.security.spec.DSAPrivateKeySpec;
+import java.security.spec.DSAPublicKeySpec;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.Set;
 
 public class StoreTest {
@@ -99,5 +104,30 @@ public class StoreTest {
         Assertions.assertEquals(secretKeyPassword, secretKeyMessageReadFromTheKey);
 //        System.out.println(new BigInteger(1, secretKey.getEncoded()).toString(16));
 
+    }
+
+    /**
+     * Manual test using : keytool -list -v -keystore randomSecretKey
+     */
+    @Test
+    public void storeKey_Test_keyPair() throws KeyStoreException {
+        String keyPairGenAlgorithm = "DSA"; //DSA RSA
+//        String keyStoreGenAlgorithm = "PKCS12"; //DSA RSA
+        String keyAliasName = "privateKeyAlias";
+        String keyStoreFilePath = "src//test//resources//store";
+        String keyStoreFileName = "keyPair";
+        String keyStorePass = "suriya";
+
+//        String publicKeyStoreFilePath = "src//test//resources//store";
+//        String publicKeyStoreFileName = "publicKey.pub";
+//        String publicKeyStorePass = "suriya";
+
+        KeyPair keyPair = AsymmetricKey.generateAsymmetricKey(keyPairGenAlgorithm);
+//        PrivateKey privateKey = keyPair.getPrivate();
+//        PublicKey publicKey = keyPair.getPublic();
+
+        Store.storeKeyPair(keyPairGenAlgorithm, keyPair, null, keyAliasName,
+                keyStoreFilePath, keyStoreFileName,  keyStorePass, RSAPrivateKeySpec.class, RSAPublicKeySpec.class);
+        Store.loadKeyPair(keyPairGenAlgorithm, keyStoreFilePath, keyStoreFileName);
     }
 }

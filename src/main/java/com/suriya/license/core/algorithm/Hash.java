@@ -3,7 +3,7 @@ package com.suriya.license.core.algorithm;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class Hash {
+public final class Hash {
 
     /**
      * MESSAGE DIGEST
