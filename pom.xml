@@ -6,7 +6,7 @@
 
     <groupId>com.suriya</groupId>
     <artifactId>lm4j</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
 
     <name>License Manager</name>
     <description>Licence manager for applications</description>
@@ -15,6 +15,8 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <github.maven.repository.url></github.maven.repository.url>
+<!--        <env.GITHUB_USERNAME></env.GITHUB_USERNAME>-->
     </properties>
 
     <developers>
@@ -38,6 +40,13 @@
     <scm>
         <url>https://github.com/suriyaprakhash/lm4j</url>
     </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>github-maven-repository</id>
+            <url>${github.maven.repository.url}</url>
+        </repository>
+    </distributionManagement>
 
     <dependencies>
         <!--  for ASN1 convertion for PKCS12-->
