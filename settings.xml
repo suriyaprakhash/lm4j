@@ -18,7 +18,8 @@
 <!--            <username>${env.GITHUB_USERNAME}</username>-->
 <!--            <password>${env.GITHUB_TOKEN}</password>-->
 <!--            <username>suriyaprakhash</username>-->
-            <password>${env.GITHUB_TOKEN}</password>
+            <username>suriyaprakhash</username>
+            <password>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</password>
         </server>
     </servers>
 </settings>
