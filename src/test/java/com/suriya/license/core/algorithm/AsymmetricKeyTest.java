@@ -1,4 +1,4 @@
-package com.suriya.license.core;
+package com.suriya.license.core.algorithm;
 
 import com.suriya.license.core.algorithm.AsymmetricKey;
 import org.junit.jupiter.api.Test;
