@@ -4,7 +4,7 @@ import java.security.*;
 
 public final class AsymmetricKey {
 
-    public static KeyPair generateAsymmetricKey(String algorithm) {
+    public static KeyPair generateAsymmetricKey(String algorithm, int keySize) {
         KeyPair keyPair = null;
         PrivateKey privateKey = null;
         PublicKey publicKey = null;
@@ -12,7 +12,7 @@ public final class AsymmetricKey {
             //Creating KeyPair generator object
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(algorithm); //DSA RSA
             //Initializing the KeyPairGenerator
-            keyPairGen.initialize(2048);
+            keyPairGen.initialize(keySize); //2048
 
             //Generating the pair of keys
             keyPair = keyPairGen.generateKeyPair();

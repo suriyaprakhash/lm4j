@@ -4,7 +4,7 @@ import java.security.*;
 
 public final class DigiSign {
 
-    public static byte[] sign(String signatureAlgorithm, PrivateKey privateKey, String data) {
+    public static byte[] sign(String signatureAlgorithm, PrivateKey privateKey, byte[] data) {
         byte[] signature = null;
         try {
             //Creating a Signature object
@@ -12,7 +12,7 @@ public final class DigiSign {
 
             //Initializing the signature
             sign.initSign(privateKey);
-            byte[] bytes = data.getBytes();
+            byte[] bytes = data; //.getBytes();
 
             //Adding data to the signature
             sign.update(bytes);
@@ -27,7 +27,7 @@ public final class DigiSign {
         return signature;
     }
 
-    public static boolean verify(String signatureAlgorithm, PublicKey publicKey, byte[] signature, String data) {
+    public static boolean verify(String signatureAlgorithm, PublicKey publicKey, byte[] signature, byte[] data) {
         boolean verified = false;
         try {
             //Creating a Signature object
@@ -35,7 +35,7 @@ public final class DigiSign {
 
             //Initializing the signature
             sign.initVerify(publicKey);
-            sign.update(data.getBytes());
+            sign.update(data); //.getBytes());
 
             verified = sign.verify(signature);
 

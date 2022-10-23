@@ -42,6 +42,7 @@ public final class SymmetricKey {
         return mySecretKey;
     }
 
+    @Deprecated
     public static Key generateKeyFromPasswordBasedEncryption(String algorithm, String password) {
         SecretKey pbeKey = null;
         try {

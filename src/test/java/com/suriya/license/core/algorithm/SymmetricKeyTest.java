@@ -15,6 +15,7 @@ public class SymmetricKeyTest {
         System.out.println("Key with DES :");
         System.out.println("MAC : " + com.suriya.license.core.algorithm.SymmetricKey.generateSecureRandomKey("DES"));
     }
+
     @Test
     public void generateSecureRandomKeyTest_DES_NotSameOnDifferentIterations() {
         System.out.println("Key with DES :");
@@ -49,4 +50,6 @@ public class SymmetricKeyTest {
         Key iteration2 = com.suriya.license.core.algorithm.SymmetricKey.generateKeyFromPasswordBasedEncryption("PBEWithSHA1AndDESede", "Suriya");
         Assertions.assertTrue(iteration1.equals(iteration2));
     }
+
+
 }

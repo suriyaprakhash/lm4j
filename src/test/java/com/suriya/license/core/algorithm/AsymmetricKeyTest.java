@@ -9,7 +9,7 @@ public class AsymmetricKeyTest {
 
     @Test
     public void generateAsymmetricKey_Test_RSA() {
-        KeyPair keyPair = AsymmetricKey.generateAsymmetricKey("DSA"); //DSA RSA
+        KeyPair keyPair = AsymmetricKey.generateAsymmetricKey("DSA", 2048); //DSA RSA
         PrivateKey privateKey = keyPair.getPrivate();
         PublicKey publicKey = keyPair.getPublic();
     }

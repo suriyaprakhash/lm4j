@@ -8,10 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.crypto.SecretKey;
 import java.security.*;
-import java.security.spec.DSAPrivateKeySpec;
-import java.security.spec.DSAPublicKeySpec;
-import java.security.spec.RSAPrivateKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.Set;
 
 public class StoreTest {
@@ -21,7 +17,9 @@ public class StoreTest {
      */
     @Test
     public void storeKey_Test_randomSecretKey() throws KeyStoreException {
+//        String keyStorePass = UUID.randomUUID().toString();//"8c60064a-66fd-4bd4-9c76-fd8034188a02"
         String keyStorePass = "suriya";
+        String secretKeyPassword = "suriya";
         String keyGenAlgorithm = "HmacSHA256";
         String keyStoreGenAlgorithm = "PKCS12";
         String secretKeyAliasName = "secretKeyAlias";
@@ -34,14 +32,14 @@ public class StoreTest {
 
         // Store Keystore
         Key key = SymmetricKey.generateSecureRandomKey(keyGenAlgorithm); //DES HmacSHA1
-        String generatedSecretMessage = new String(key.getEncoded());
-        Set<KeyStore.Entry.Attribute> attributeSet = Store.getAttributesSet(licenseIdAttributeValue, userIdAttributeValue, hostNameAttributeValue);
-        Store.storeSecretKey(keyStoreGenAlgorithm, key, attributeSet, secretKeyAliasName, keyStoreFilePath,keyStoreFileName,  keyStorePass); //JCEKS PKCS12
+        String generatedKeySecretMessage = new String(key.getEncoded());
+        Set<KeyStore.Entry.Attribute> attributeSet = Store.populateAttributeSetFromMap(licenseIdAttributeValue, userIdAttributeValue, hostNameAttributeValue);
+        Store.storeSecretKey(keyStoreGenAlgorithm, key, attributeSet, secretKeyAliasName, keyStorePass, keyStoreFilePath,keyStoreFileName,  keyStorePass); //JCEKS PKCS12
 
         // Read from keyStore and validate
         // here keyStoreEntry has secretKey in case of asymetric key it will have private/public key
-        KeyStore.Entry keyStoreEntry = Store.readKeyStoreEntryFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName, keyStoreFilePath,keyStoreFileName,  keyStorePass);
-        SecretKey secretKey = Store.readSecretKeyFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName, keyStoreFilePath,keyStoreFileName,  keyStorePass);
+        KeyStore.Entry keyStoreEntry = Store.readKeyStoreEntryFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName,secretKeyPassword, keyStoreFilePath,keyStoreFileName,  keyStorePass);
+        SecretKey secretKey = Store.readSecretKeyFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName,secretKeyPassword, keyStoreFilePath,keyStoreFileName,  keyStorePass);
         Set<KeyStore.Entry.Attribute> attributeSetReadFromTheEntry = keyStoreEntry.getAttributes();
 
         // Validate entry
@@ -57,7 +55,7 @@ public class StoreTest {
 
         // Validate secret key
         String secretKeyMessageReadFromTheKey = new String(secretKey.getEncoded());
-        Assertions.assertEquals(generatedSecretMessage, secretKeyMessageReadFromTheKey);
+        Assertions.assertEquals(generatedKeySecretMessage, secretKeyMessageReadFromTheKey);
     }
 
     /**
@@ -65,8 +63,11 @@ public class StoreTest {
      */
     @Test
     public void storeKey_Test_secretFromPassword() throws KeyStoreException {
-        String secretKeyPassword = "mySecret";
+//        String secretKeyPassword = UUID.randomUUID().toString();//"8c60064a-66fd-4bd4-9c76-fd8034188a02"
+        String secretKeyPassword = "suriya";
         String keyStorePass = "suriya";
+        String keySecretMessage = "hello"; //secretKey message part of key
+
         String keyGenAlgorithm = "HmacSHA256";
         String keyStoreGenAlgorithm = "PKCS12";
         String secretKeyAliasName = "secretKeyAlias";
@@ -78,14 +79,14 @@ public class StoreTest {
         String hostNameAttributeValue = "host2";
 
         // Store Keystore
-        Key key = SymmetricKey.generateKeyFromPassword(keyGenAlgorithm, secretKeyPassword); //DES HmacSHA1
-        Set<KeyStore.Entry.Attribute> attributeSet = Store.getAttributesSet(licenseIdAttributeValue, userIdAttributeValue, hostNameAttributeValue);
-        Store.storeSecretKey(keyStoreGenAlgorithm, key, attributeSet, secretKeyAliasName, keyStoreFilePath,keyStoreFileName,  keyStorePass); //JCEKS PKCS12
+        Key key = SymmetricKey.generateKeyFromPassword(keyGenAlgorithm, keySecretMessage); //DES HmacSHA1
+        Set<KeyStore.Entry.Attribute> attributeSet = Store.populateAttributeSetFromMap(licenseIdAttributeValue, userIdAttributeValue, hostNameAttributeValue);
+        Store.storeSecretKey(keyStoreGenAlgorithm, key, attributeSet, secretKeyAliasName, keyStorePass, keyStoreFilePath,keyStoreFileName,  keyStorePass); //JCEKS PKCS12
 
         // Read from keyStore and validate
         // here keyStoreEntry has secretKey in case of asymetric key it will have private/public key
-        KeyStore.Entry keyStoreEntry = Store.readKeyStoreEntryFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName, keyStoreFilePath,keyStoreFileName,  keyStorePass);
-        SecretKey secretKey = Store.readSecretKeyFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName, keyStoreFilePath,keyStoreFileName,  keyStorePass);
+        KeyStore.Entry keyStoreEntry = Store.readKeyStoreEntryFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName,secretKeyPassword, keyStoreFilePath,keyStoreFileName,  keyStorePass);
+        SecretKey secretKey = Store.readSecretKeyFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName,secretKeyPassword, keyStoreFilePath,keyStoreFileName,  keyStorePass);
         Set<KeyStore.Entry.Attribute> attributeSetReadFromTheEntry = keyStoreEntry.getAttributes();
 
         // Validate entry
@@ -101,7 +102,7 @@ public class StoreTest {
 
         // Validate secret key
         String secretKeyMessageReadFromTheKey = new String(secretKey.getEncoded());
-        Assertions.assertEquals(secretKeyPassword, secretKeyMessageReadFromTheKey);
+        Assertions.assertEquals(keySecretMessage, secretKeyMessageReadFromTheKey);
 //        System.out.println(new BigInteger(1, secretKey.getEncoded()).toString(16));
 
     }
@@ -112,22 +113,24 @@ public class StoreTest {
     @Test
     public void storeKey_Test_keyPair() throws KeyStoreException {
         String keyPairGenAlgorithm = "RSA"; //DSA RSA
-//        String keyStoreGenAlgorithm = "PKCS12"; //DSA RSA
+        String keyStoreGenAlgorithm = "PKCS12"; //DSA RSA
         String keyAliasName = "privateKeyAlias";
         String keyStoreFilePath = "src//test//resources//store";
         String keyStoreFileName = "rsakeyPair";
+//        String keyStorePass = UUID.randomUUID().toString();//"8c60064a-66fd-4bd4-9c76-fd8034188a02"
         String keyStorePass = "suriya";
 
 //        String publicKeyStoreFilePath = "src//test//resources//store";
 //        String publicKeyStoreFileName = "publicKey.pub";
 //        String publicKeyStorePass = "suriya";
 
-        KeyPair keyPair = AsymmetricKey.generateAsymmetricKey(keyPairGenAlgorithm);
+        KeyPair keyPair = AsymmetricKey.generateAsymmetricKey(keyPairGenAlgorithm, 2048);
 //        PrivateKey privateKey = keyPair.getPrivate();
 //        PublicKey publicKey = keyPair.getPublic();
 
-        Store.storeKeyPair(keyPairGenAlgorithm, keyPair, null, keyAliasName,
-                keyStoreFilePath, keyStoreFileName,  keyStorePass, RSAPrivateKeySpec.class, RSAPublicKeySpec.class);
+        Store.storeKeyPair(keyPair,
+                keyStoreFilePath, keyStoreFileName);
         Store.loadKeyPair(keyPairGenAlgorithm, keyStoreFilePath, keyStoreFileName);
     }
+
 }

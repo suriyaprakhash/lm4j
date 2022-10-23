@@ -5,7 +5,7 @@ import java.security.*;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class Generator {
+public class Support {
 
 //    private static Generator generator;
 //
