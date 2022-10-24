@@ -27,14 +27,14 @@ public class SymmetricKeyTest {
 
 
     /**
-     *  Test for {@link com.suriya.license.core.algorithm.SymmetricKey#generateKeyFromPassword(String, String)}  with DER
+     *  Test for {@link com.suriya.license.core.algorithm.SymmetricKey#generateSecretKeyFromPassword(String, String)}  with DER
      */
     @Test
     public void generateKeyFromPasswordTest_DER_SameForSamePassword() {
         System.out.println("Key with DER :");
-        System.out.println("MAC : " + com.suriya.license.core.algorithm.SymmetricKey.generateKeyFromPassword("DER", "Suriya"));
-        Key iteration1 = com.suriya.license.core.algorithm.SymmetricKey.generateKeyFromPassword("DER", "Suriya");
-        Key iteration2 = com.suriya.license.core.algorithm.SymmetricKey.generateKeyFromPassword("DER", "Suriya");
+        System.out.println("MAC : " + com.suriya.license.core.algorithm.SymmetricKey.generateSecretKeyFromPassword("DER", "Suriya"));
+        Key iteration1 = com.suriya.license.core.algorithm.SymmetricKey.generateSecretKeyFromPassword("DER", "Suriya");
+        Key iteration2 = com.suriya.license.core.algorithm.SymmetricKey.generateSecretKeyFromPassword("DER", "Suriya");
         Assertions.assertTrue(iteration1.equals(iteration2));
     }
 

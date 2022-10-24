@@ -2,6 +2,8 @@ package com.suriya.license.core;
 
 import com.suriya.license.core.algorithm.AsymmetricKey;
 import com.suriya.license.core.algorithm.SymmetricKey;
+import com.suriya.license.core.parser.AttributeParser;
+import com.suriya.license.core.parser.FileProcessor;
 import com.suriya.license.util.ConversionUtility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -10,7 +12,7 @@ import javax.crypto.SecretKey;
 import java.security.*;
 import java.util.Set;
 
-public class StoreTest {
+public class FileProcessorTest {
 
     /**
      * Manual test using : keytool -list -v -keystore randomSecretKey
@@ -33,19 +35,19 @@ public class StoreTest {
         // Store Keystore
         Key key = SymmetricKey.generateSecureRandomKey(keyGenAlgorithm); //DES HmacSHA1
         String generatedKeySecretMessage = new String(key.getEncoded());
-        Set<KeyStore.Entry.Attribute> attributeSet = Store.populateAttributeSetFromMap(licenseIdAttributeValue, userIdAttributeValue, hostNameAttributeValue);
-        Store.storeSecretKey(keyStoreGenAlgorithm, key, attributeSet, secretKeyAliasName, keyStorePass, keyStoreFilePath,keyStoreFileName,  keyStorePass); //JCEKS PKCS12
+        Set<KeyStore.Entry.Attribute> attributeSet = AttributeParser.populateAttributeSetFromMap(licenseIdAttributeValue, userIdAttributeValue, hostNameAttributeValue);
+        FileProcessor.storeSecretKeyInKeyStore(keyStoreGenAlgorithm, key, attributeSet, secretKeyAliasName, keyStorePass, keyStoreFilePath,keyStoreFileName,  keyStorePass); //JCEKS PKCS12
 
         // Read from keyStore and validate
         // here keyStoreEntry has secretKey in case of asymetric key it will have private/public key
-        KeyStore.Entry keyStoreEntry = Store.readKeyStoreEntryFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName,secretKeyPassword, keyStoreFilePath,keyStoreFileName,  keyStorePass);
-        SecretKey secretKey = Store.readSecretKeyFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName,secretKeyPassword, keyStoreFilePath,keyStoreFileName,  keyStorePass);
+        KeyStore.Entry keyStoreEntry = FileProcessor.readKeyStoreEntryFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName,secretKeyPassword, keyStoreFilePath,keyStoreFileName,  keyStorePass);
+        SecretKey secretKey = FileProcessor.readSecretKeyFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName,secretKeyPassword, keyStoreFilePath,keyStoreFileName,  keyStorePass);
         Set<KeyStore.Entry.Attribute> attributeSetReadFromTheEntry = keyStoreEntry.getAttributes();
 
         // Validate entry
-        String licenseIdASN1 = ConversionUtility.stringToASN1(Store.LICENSE_ID_ATTRIBUTE_NAME).toString();
-        String userIdASN1 = ConversionUtility.stringToASN1(Store.USER_ID_ATTRIBUTE_NAME).toString();
-        String hostNameASN1 = ConversionUtility.stringToASN1(Store.HOSTNAME_ATTRIBUTE_NAME).toString();
+        String licenseIdASN1 = ConversionUtility.stringToASN1(AttributeParser.LICENSE_ID_ATTRIBUTE_NAME).toString();
+        String userIdASN1 = ConversionUtility.stringToASN1(AttributeParser.USER_ID_ATTRIBUTE_NAME).toString();
+        String hostNameASN1 = ConversionUtility.stringToASN1(AttributeParser.HOSTNAME_ATTRIBUTE_NAME).toString();
         KeyStore.Entry.Attribute licenseIdAttribute = attributeSetReadFromTheEntry.stream().filter(attribute -> attribute.getName().equals(licenseIdASN1)).findAny().get();
         KeyStore.Entry.Attribute userIdAttribute = attributeSetReadFromTheEntry.stream().filter(attribute -> attribute.getName().equals(userIdASN1)).findAny().get();
         KeyStore.Entry.Attribute hostNameAttribute = attributeSetReadFromTheEntry.stream().filter(attribute -> attribute.getName().equals(hostNameASN1)).findAny().get();
@@ -79,20 +81,20 @@ public class StoreTest {
         String hostNameAttributeValue = "host2";
 
         // Store Keystore
-        Key key = SymmetricKey.generateKeyFromPassword(keyGenAlgorithm, keySecretMessage); //DES HmacSHA1
-        Set<KeyStore.Entry.Attribute> attributeSet = Store.populateAttributeSetFromMap(licenseIdAttributeValue, userIdAttributeValue, hostNameAttributeValue);
-        Store.storeSecretKey(keyStoreGenAlgorithm, key, attributeSet, secretKeyAliasName, keyStorePass, keyStoreFilePath,keyStoreFileName,  keyStorePass); //JCEKS PKCS12
+        Key key = SymmetricKey.generateSecretKeyFromPassword(keyGenAlgorithm, keySecretMessage); //DES HmacSHA1
+        Set<KeyStore.Entry.Attribute> attributeSet = AttributeParser.populateAttributeSetFromMap(licenseIdAttributeValue, userIdAttributeValue, hostNameAttributeValue);
+        FileProcessor.storeSecretKeyInKeyStore(keyStoreGenAlgorithm, key, attributeSet, secretKeyAliasName, keyStorePass, keyStoreFilePath,keyStoreFileName,  keyStorePass); //JCEKS PKCS12
 
         // Read from keyStore and validate
         // here keyStoreEntry has secretKey in case of asymetric key it will have private/public key
-        KeyStore.Entry keyStoreEntry = Store.readKeyStoreEntryFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName,secretKeyPassword, keyStoreFilePath,keyStoreFileName,  keyStorePass);
-        SecretKey secretKey = Store.readSecretKeyFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName,secretKeyPassword, keyStoreFilePath,keyStoreFileName,  keyStorePass);
+        KeyStore.Entry keyStoreEntry = FileProcessor.readKeyStoreEntryFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName,secretKeyPassword, keyStoreFilePath,keyStoreFileName,  keyStorePass);
+        SecretKey secretKey = FileProcessor.readSecretKeyFromKeyStore(keyStoreGenAlgorithm, secretKeyAliasName,secretKeyPassword, keyStoreFilePath,keyStoreFileName,  keyStorePass);
         Set<KeyStore.Entry.Attribute> attributeSetReadFromTheEntry = keyStoreEntry.getAttributes();
 
         // Validate entry
-        String licenseIdASN1 = ConversionUtility.stringToASN1(Store.LICENSE_ID_ATTRIBUTE_NAME).toString();
-        String userIdASN1 = ConversionUtility.stringToASN1(Store.USER_ID_ATTRIBUTE_NAME).toString();
-        String hostNameASN1 = ConversionUtility.stringToASN1(Store.HOSTNAME_ATTRIBUTE_NAME).toString();
+        String licenseIdASN1 = ConversionUtility.stringToASN1(AttributeParser.LICENSE_ID_ATTRIBUTE_NAME).toString();
+        String userIdASN1 = ConversionUtility.stringToASN1(AttributeParser.USER_ID_ATTRIBUTE_NAME).toString();
+        String hostNameASN1 = ConversionUtility.stringToASN1(AttributeParser.HOSTNAME_ATTRIBUTE_NAME).toString();
         KeyStore.Entry.Attribute licenseIdAttribute = attributeSetReadFromTheEntry.stream().filter(attribute -> attribute.getName().equals(licenseIdASN1)).findAny().get();
         KeyStore.Entry.Attribute userIdAttribute = attributeSetReadFromTheEntry.stream().filter(attribute -> attribute.getName().equals(userIdASN1)).findAny().get();
         KeyStore.Entry.Attribute hostNameAttribute = attributeSetReadFromTheEntry.stream().filter(attribute -> attribute.getName().equals(hostNameASN1)).findAny().get();
@@ -128,9 +130,9 @@ public class StoreTest {
 //        PrivateKey privateKey = keyPair.getPrivate();
 //        PublicKey publicKey = keyPair.getPublic();
 
-        Store.storeKeyPair(keyPair,
+        FileProcessor.storeKeyPair(keyPair,
                 keyStoreFilePath, keyStoreFileName);
-        Store.loadKeyPair(keyPairGenAlgorithm, keyStoreFilePath, keyStoreFileName);
+        FileProcessor.loadKeyPair(keyPairGenAlgorithm, keyStoreFilePath, keyStoreFileName);
     }
 
 }

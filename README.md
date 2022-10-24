@@ -2,12 +2,13 @@
 
 https://infra.apache.org/apply-license.html
 
-
+SERIAL_KEY : SECRETCODE, SIGNATURE, PUBLICKEY
 Steps:
 
 - Create Secret/Attr using SecretKey add to keyStore
 - Create Private/Public Key to and sign the keyStore created earlier
 - Distribute (byte[][] - 0x - keyStore, 1x- )
+
 
 Helped:
 

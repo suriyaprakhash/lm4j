@@ -36,7 +36,7 @@ public final class SymmetricKey {
         return key;
     }
 
-    public static Key generateKeyFromPassword(String algorithm, String password) {
+    public static Key generateSecretKeyFromPassword(String algorithm, String password) {
         //Creating SecretKey object
         SecretKey mySecretKey = new SecretKeySpec(password.getBytes(), algorithm); //DSA
         return mySecretKey;
