@@ -43,8 +43,9 @@
 
     <distributionManagement>
         <repository>
-            <id>github-maven-repository</id>
-            <url>${github.maven.repository.url}</url>
+            <id>github</id>
+            <name>Github Suriya Prakhash Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/suriyaprakhash/lm4j</url>
         </repository>
     </distributionManagement>
 
