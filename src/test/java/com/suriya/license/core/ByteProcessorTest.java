@@ -52,7 +52,8 @@ public class ByteProcessorTest {
         // WRITE
         Key key1 = SymmetricKey.generateSecureRandomKey(secureRandomKeyAlgorithm); //DES HmacSHA1
         String encodedKeyString1 = Base64.getEncoder().encodeToString(key1.getEncoded());
-        KeyStore keyStore1 = ByteProcessor.storeSecretKeyInKeyStore(null, keyStoreAlgorithm, filePassword, key1,  "productKey", productPassword, AttributeParser.populateAttributeSetFromMap(productKeyAttributeMap));
+        KeyStore keyStore1 = ByteProcessor.keyStoreFromKeyStoreByteArray(null, keyStoreAlgorithm, filePassword);
+        ByteProcessor.storeSecretKeyInKeyStore(keyStore1, keyStoreAlgorithm, filePassword, key1,  "productKey", productPassword, AttributeParser.populateAttributeSetFromMap(productKeyAttributeMap));
         byte[] keyStoreByteArray1 = ByteProcessor.writeKeyStoreIntoByteArray(keyStore1, filePassword);
         System.out.println("keyStoreByteArray1.length: "+keyStoreByteArray1.length);
 
@@ -73,7 +74,8 @@ public class ByteProcessorTest {
 
         Map<String, String> publicKeyAttributeMap = new HashMap<>();
         publicKeyAttributeMap.put("publicKey", Base64.getEncoder().encodeToString(publicKey.getEncoded()));
-        KeyStore keyStore2 = ByteProcessor.storeSecretKeyInKeyStore(keyStoreByteArray1, keyStoreAlgorithm, filePassword, key2,  "publicKey", encodedKeyString1, AttributeParser.populateAttributeSetFromMap(publicKeyAttributeMap));
+        KeyStore keyStore2 = ByteProcessor.keyStoreFromKeyStoreByteArray(keyStoreByteArray1, keyStoreAlgorithm, filePassword);
+        ByteProcessor.storeSecretKeyInKeyStore(keyStore2, keyStoreAlgorithm, filePassword, key2,  "publicKey", encodedKeyString1, AttributeParser.populateAttributeSetFromMap(publicKeyAttributeMap));
         byte[] keyStoreByteArray2 = ByteProcessor.writeKeyStoreIntoByteArray(keyStore2, filePassword);
         System.out.println("keyStoreByteArray2.length: "+keyStoreByteArray2.length);
 
@@ -104,7 +106,8 @@ public class ByteProcessorTest {
         Map<String, String> signatureAttributeMap = new HashMap<>();
         signatureAttributeMap.put("signature", Base64.getEncoder().encodeToString(signature));
 
-        KeyStore keyStore3 = ByteProcessor.storeSecretKeyInKeyStore(keyStoreByteArray1, keyStoreAlgorithm, filePassword, key3,  "signatureKey", encodedKeyString2, AttributeParser.populateAttributeSetFromMap(signatureAttributeMap));
+        KeyStore keyStore3 = ByteProcessor.keyStoreFromKeyStoreByteArray(keyStoreByteArray2, keyStoreAlgorithm, filePassword);
+        ByteProcessor.storeSecretKeyInKeyStore(keyStore3, keyStoreAlgorithm, filePassword, key3,  "signatureKey", encodedKeyString2, AttributeParser.populateAttributeSetFromMap(signatureAttributeMap));
         byte[] keyStoreByteArray3 = ByteProcessor.writeKeyStoreIntoByteArray(keyStore3, filePassword);
         System.out.println("keyStoreByteArray3.length: "+keyStoreByteArray3.length);
 

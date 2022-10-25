@@ -5,7 +5,6 @@ import com.suriya.license.core.algorithm.DigiSign;
 import com.suriya.license.core.algorithm.SymmetricKey;
 import com.suriya.license.core.parser.AttributeParser;
 import com.suriya.license.core.parser.ByteProcessor;
-import com.suriya.license.core.parser.MainProcessor;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -64,9 +63,10 @@ public final class KeyChain implements AlgorithmDefaults {
     private String bindProductKey() {
         Key secretProductKey = SymmetricKey.generateSecureRandomKey(secureRandomKeyAlgorithm); //DES HmacSHA1
         String encodedProductKeyString = Base64.getEncoder().encodeToString(secretProductKey.getEncoded());
-        keyStore = ByteProcessor.storeSecretKeyInKeyStore(null, keyStoreAlgorithm,
-                info.getFilePassword(), secretProductKey, "infoKey",
-                info.getProductPassword(),
+        keyStore = ByteProcessor.keyStoreFromKeyStoreByteArray(null, keyStoreAlgorithm,
+                info.getFilePassword());
+        ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm, info.getFilePassword(), secretProductKey,
+                INFO_KEY, info.getProductPassword(),
                 AttributeParser.populateAttributeSetFromMap(informationKeyAttributeMap));
         return encodedProductKeyString;
     }
@@ -78,20 +78,20 @@ public final class KeyChain implements AlgorithmDefaults {
         privateKey = keyPair.getPrivate();
         publicKey = keyPair.getPublic();
         Map<String, String> publicKeyAttributeMap = new HashMap<>();
-        publicKeyAttributeMap.put("publicKey", Base64.getEncoder().encodeToString(publicKey.getEncoded()));
-        MainProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm, info.getFilePassword(),
-                secretPublicKey,  "publicKey", encodedProductKeyString, AttributeParser.populateAttributeSetFromMap(publicKeyAttributeMap));
+        publicKeyAttributeMap.put(PUBLIC_KEY, Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+        ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm, info.getFilePassword(),
+                secretPublicKey, PUBLIC_KEY, encodedProductKeyString, AttributeParser.populateAttributeSetFromMap(publicKeyAttributeMap));
         return encodedPublicKeyString;
     }
 
     private void bindSignatureKey(String encodedPublicKeyString) {
         String productKeyUniqueIdentifier = UUID.randomUUID().toString(); // TODO generate hash from productAttributes
-        Key key3 = SymmetricKey.generateSecretKeyFromPassword(passwordKeyAlgorithm, productKeyUniqueIdentifier);
+        Key secretSignatureKey = SymmetricKey.generateSecretKeyFromPassword(passwordKeyAlgorithm, productKeyUniqueIdentifier);
         byte[] signature = DigiSign.sign(signAlgorithmRSA, privateKey, "data to be encrypted".getBytes(StandardCharsets.UTF_8));
         Map<String, String> signatureAttributeMap = new HashMap<>();
         signatureAttributeMap.put("signature", Base64.getEncoder().encodeToString(signature));
 
-        MainProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm, info.getFilePassword(), key3,  "signatureKey", encodedPublicKeyString, AttributeParser.populateAttributeSetFromMap(signatureAttributeMap));
+        ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm, info.getFilePassword(), secretSignatureKey,  SIGNATURE_KEY, encodedPublicKeyString, AttributeParser.populateAttributeSetFromMap(signatureAttributeMap));
     }
 
 

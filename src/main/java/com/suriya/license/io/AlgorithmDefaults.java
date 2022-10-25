@@ -12,4 +12,8 @@ public interface AlgorithmDefaults {
     static String signAlgorithmRSA = "SHA256withRSA";
     static int keyPairKeySize = 2048;
 
+    static String INFO_KEY = "infoKey";
+    static String PUBLIC_KEY = "publicKey";
+    static String SIGNATURE_KEY = "signatureKey";
+
 }

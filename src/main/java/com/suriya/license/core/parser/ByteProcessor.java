@@ -16,6 +16,68 @@ public class ByteProcessor {
 
     private static final List<byte[]> LICENSE_LIST = new ArrayList<>(3);
 
+
+    public static KeyStore keyStoreFromKeyStoreByteArray(byte[] keyStoreByteArray, String keyStoreAlgorithm,
+                                                         String keyStorePass)  {
+        KeyStore keyStore = null;
+        try {
+            //Creating the KeyStore object
+            keyStore = KeyStore.getInstance(keyStoreAlgorithm);  //JCEKS PKCS12
+
+            //Loading the KeyStore object
+            char[] keyStorePasswordCharArray = keyStorePass.toCharArray(); // changeit
+
+            //Check if key store already exists
+            if (keyStoreByteArray == null) {
+                keyStore.load(null, keyStorePasswordCharArray);
+            } else {
+                InputStream myInputStream = new ByteArrayInputStream(keyStoreByteArray);
+                keyStore.load(myInputStream, keyStorePass.toCharArray());
+            }
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+        return keyStore;
+    }
+
+    public static void storeSecretKeyInKeyStore(KeyStore keyStore, String keyStoreAlgorithm, String keyStorePass, Key key,
+                                                String secretKeyEntryAliasName, String secretPassword,
+                                                Set<KeyStore.Entry.Attribute> attributeSet) {
+        try {
+            //Creating the KeyStore.ProtectionParameter object
+            KeyStore.ProtectionParameter protectionParam = new KeyStore.PasswordProtection(secretPassword.toCharArray());
+
+            //Creating SecretKeyEntry object
+            KeyStore.SecretKeyEntry secretKeyEntry = null;
+            if (attributeSet != null) {
+                secretKeyEntry = new KeyStore.SecretKeyEntry((SecretKey) key, attributeSet);
+            } else {
+                secretKeyEntry = new KeyStore.SecretKeyEntry((SecretKey) key);
+            }
+            keyStore.setEntry(secretKeyEntryAliasName, secretKeyEntry, protectionParam); //"secretKeyAlias"
+
+//            //Storing the KeyStore object
+//            ByteArrayOutputStream out = new ByteArrayOutputStream();
+//            keyStore.store(out, keyStorePasswordCharArray);
+//            updatedKeyStoreByteArray = new byte[out.size()];
+//            System.out.println(out.size());
+//            updatedKeyStoreByteArray = out.toByteArray();
+//
+//            out.close();
+
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*
+
     public static KeyStore storeSecretKeyInKeyStore(byte[] keyStoreByteArray, String keyStoreAlgorithm, String keyStorePass, Key key,
                                                   String secretKeyEntryAliasName, String secretPassword,
                                                   Set<KeyStore.Entry.Attribute> attributeSet) {
@@ -71,6 +133,8 @@ public class ByteProcessor {
         }
         return keyStore;
     }
+
+     */
 
     public static byte[] writeKeyStoreIntoByteArray(KeyStore keyStore, String keyStorePassword) {
         byte[] keyStoreByteArray = null;
@@ -208,77 +272,4 @@ public class ByteProcessor {
 //        return keyStoreEntry;
 //    }
 
-
-    //    https://stackoverflow.com/questions/9890313/how-to-use-keystore-in-java-to-store-private-key
-    public static void storeKeyPair(KeyPair keyPair,
-                                    String keyStoreFolderPath, String keyStoreName) {
-        try {
-            PrivateKey privateKey = keyPair.getPrivate();
-            PublicKey publicKey = keyPair.getPublic();
-
-            // Store Public Key.
-            X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(
-                    publicKey.getEncoded());
-            FileOutputStream fos = new FileOutputStream(keyStoreFolderPath + "//" + keyStoreName + ".pub");
-            fos.write(x509EncodedKeySpec.getEncoded());
-            fos.close();
-
-            // Store Private Key.
-            PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(
-                    privateKey.getEncoded());
-            fos = new FileOutputStream(keyStoreFolderPath + "//" + keyStoreName);
-            fos.write(pkcs8EncodedKeySpec.getEncoded());
-            fos.close();
-
-            System.out.println("data stored");
-
-        } catch (FileNotFoundException fileNotFoundException) {
-            fileNotFoundException.printStackTrace();
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-    }
-
-
-
-    public static KeyPair loadKeyPair(String algorithm, String keyStoreFolderPath, String keyStoreName)
-    {
-        PublicKey publicKey = null;
-        PrivateKey privateKey = null;
-        try {
-            // Read Public Key.
-            File filePublicKey = new File(keyStoreFolderPath + "//" + keyStoreName + ".pub");
-            FileInputStream fis = new FileInputStream(keyStoreFolderPath + "//" + keyStoreName + ".pub");
-            byte[] encodedPublicKey = new byte[(int) filePublicKey.length()];
-            fis.read(encodedPublicKey);
-            fis.close();
-
-            // Read Private Key.
-            File filePrivateKey = new File(keyStoreFolderPath + "//" + keyStoreName);
-            fis = new FileInputStream(keyStoreFolderPath + "//" + keyStoreName);
-            byte[] encodedPrivateKey = new byte[(int) filePrivateKey.length()];
-            fis.read(encodedPrivateKey);
-            fis.close();
-
-            // Generate KeyPair.
-            KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
-            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(
-                    encodedPublicKey);
-            publicKey = keyFactory.generatePublic(publicKeySpec);
-
-            PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(
-                    encodedPrivateKey);
-            privateKey = keyFactory.generatePrivate(privateKeySpec);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-
-        return new KeyPair(publicKey, privateKey);
-    }
 }
