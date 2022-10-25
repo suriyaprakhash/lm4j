@@ -1,4 +1,4 @@
-package com.suriya.keychain.core;
+package com.suriya.keychain.core.algorithm;
 
 import java.security.*;
 import java.util.Set;

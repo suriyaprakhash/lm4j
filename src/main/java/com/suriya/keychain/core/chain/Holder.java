@@ -1,11 +1,11 @@
-package com.suriya.keychain.core;
+package com.suriya.keychain.core.chain;
 
 import com.suriya.license.io.Info;
 
 import java.util.Map;
 import java.util.Set;
 
-public class Base {
+public class Holder {
 
     protected Info info;
     protected Set<String> infoKeyAttributeSet;

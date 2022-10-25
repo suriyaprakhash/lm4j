@@ -1,10 +1,12 @@
 package com.suriya.keychain.io;
 
-import com.suriya.keychain.core.ChainValidator;
+import com.suriya.keychain.core.chain.ContentExtractor;
 import com.suriya.keychain.core.algorithm.AsymmetricKey;
 import com.suriya.keychain.core.algorithm.DigiSign;
 import com.suriya.keychain.core.algorithm.Hash;
 import com.suriya.keychain.core.algorithm.SymmetricKey;
+import com.suriya.keychain.core.chain.ValidationHolder;
+import com.suriya.keychain.core.chain.Validator;
 import com.suriya.keychain.core.parser.AttributeParser;
 import com.suriya.keychain.core.parser.ByteProcessor;
 import com.suriya.keychain.core.parser.Content;
@@ -136,7 +138,7 @@ public final class KeyChain {
             signature = DigiSign.sign(signAlgorithm, privateKey, (Base64.getEncoder().encodeToString(publicKey.getEncoded())
                     + infoKeyUniqueIdentifier).getBytes(StandardCharsets.UTF_8));
             Map<String, String> signatureAttributeMap = new HashMap<>();
-            signatureAttributeMap.put("signature", Base64.getEncoder().encodeToString(signature));
+            signatureAttributeMap.put(SIGNATURE_KEY, Base64.getEncoder().encodeToString(signature));
 
             ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm, info.getFilePassword(), secretSignatureKey,  SIGNATURE_KEY, encodedPublicKeyString, AttributeParser.populateAttributeSetFromMap(signatureAttributeMap));
         }
@@ -144,20 +146,21 @@ public final class KeyChain {
 
     private static final class Verifier {
 
-        private ChainValidator chainValidator;
+        private ContentExtractor contentExtractor;
 
         private Verifier(Info info, Set<String> infoKeyAttributeSet) {
-            ChainValidator chainValidator = new ChainValidator();
-            chainValidator.setInfo(info);
-            chainValidator.setInfoKeyAttributeSet(infoKeyAttributeSet);
-            this.chainValidator = chainValidator;
+            ValidationHolder validationHolder = new ValidationHolder();
+            validationHolder.setInfo(info);
+            validationHolder.setInfoKeyAttributeSet(infoKeyAttributeSet);
+            ContentExtractor contentExtractor = new ContentExtractor(validationHolder);
+            this.contentExtractor = contentExtractor;
         }
 
         private byte[] get() {
             byte[] fileByteArray = null;
             try {
-             fileByteArray = Files.readAllBytes(Path.of(chainValidator.getInfo().getFilePath() + "//" + chainValidator
-                     .getInfo().getFileName() + ".kc"));
+             fileByteArray = Files.readAllBytes(Path.of(contentExtractor.getValidationHolder().getInfo().getFilePath() + "//" +
+                     contentExtractor.getValidationHolder().getInfo().getFileName() + ".kc"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -174,13 +177,12 @@ public final class KeyChain {
 
         private boolean verify() {
             // READ
-            KeyStore keyStore = ByteProcessor.readKeyStoreFromByteArray(getBody(), keyStoreAlgorithm, chainValidator
-                    .getInfo().getFilePassword());
-            String uuid = chainValidator.validate(keyStore);
-            return false;
+            KeyStore keyStore = ByteProcessor.readKeyStoreFromByteArray(getBody(), keyStoreAlgorithm,
+                    contentExtractor.getValidationHolder().getInfo().getFilePassword());
+            String uuid = contentExtractor.extract(keyStore);
+            boolean signatureValid = Validator.validateSignature(contentExtractor.getValidationHolder());
+            return signatureValid;
         }
-
-
 
     }
 
