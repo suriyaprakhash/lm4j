@@ -5,7 +5,7 @@ import com.suriya.license.core.algorithm.DigiSign;
 import com.suriya.license.core.algorithm.SymmetricKey;
 import com.suriya.license.core.parser.AttributeParser;
 import com.suriya.license.core.parser.ByteProcessor;
-import com.suriya.license.io.ProductKey;
+import com.suriya.license.io.Info;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -40,13 +40,13 @@ public class ByteProcessorTest {
         productKeyAttributeMap.put("dod", "deliveryDate");
         productKeyAttributeMap.put("dope", "prodExpDate");
 
-        ProductKey productKey = new ProductKey();
-        productKey.setProductName(productName);
-        productKey.setProductPassword(productPassword);
+        Info info = new Info();
+        info.setProductName(productName);
+        info.setProductPassword(productPassword);
 
-        productKey.setFilePath(filePath);
-        productKey.setFileName(fileName);
-        productKey.setFilePassword(filePassword);
+        info.setFilePath(filePath);
+        info.setFileName(fileName);
+        info.setFilePassword(filePassword);
 
         // KEY 1
         // WRITE
@@ -98,7 +98,7 @@ public class ByteProcessorTest {
 
         // KEY 3
         // WRITE
-        String productKeyUniqueIdentifier = UUID.randomUUID().toString();
+        String productKeyUniqueIdentifier = UUID.randomUUID().toString(); // TODO generate hash from productAttributes
         Key key3 = SymmetricKey.generateSecretKeyFromPassword(passwordKeyAlgorithm, productKeyUniqueIdentifier);
         byte[] signature = DigiSign.sign(signAlgorithmRSA, privateKey, Base64.getEncoder().encodeToString(key1.getEncoded()).getBytes(StandardCharsets.UTF_8));
         Map<String, String> signatureAttributeMap = new HashMap<>();

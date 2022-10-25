@@ -1,11 +1,8 @@
 package com.suriya.license.io;
 
-import com.suriya.license.core.algorithm.SymmetricKey;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import javax.crypto.SecretKey;
-import java.security.Key;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,21 +25,21 @@ public class LicenseManagerTest {
         attributeMap.put("dod", "deliveryDate");
         attributeMap.put("dope", "prodExpDate");
 
-        ProductKey productKey = new ProductKey();
-        productKey.setProductName(productName);
-        productKey.setProductPassword(productPassword);
+        Info info = new Info();
+        info.setProductName(productName);
+        info.setProductPassword(productPassword);
 
-        productKey.setFilePath(filePath);
-        productKey.setFileName(fileName);
-        productKey.setFilePassword(filePassword);
+        info.setFilePath(filePath);
+        info.setFileName(fileName);
+        info.setFilePassword(filePassword);
 
 
         LicenseManager licenseManager = LicenseManager.getInstance();
-        licenseManager.generate(productKey, attributeMap);
+        licenseManager.generate(info, attributeMap);
 
         Set<String> keys = new HashSet<>(attributeMap.keySet());
 //        keys.add("hello");
-        Map<String, String> attributeMapReadFromTheStoreEntry = licenseManager.readAttributeMap(productKey, keys);
+        Map<String, String> attributeMapReadFromTheStoreEntry = licenseManager.readAttributeMap(info, keys);
         Assertions.assertTrue(attributeMapReadFromTheStoreEntry.equals(attributeMap));
     }
 

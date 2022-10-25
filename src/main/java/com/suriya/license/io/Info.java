@@ -1,6 +1,6 @@
 package com.suriya.license.io;
 
-public final class ProductKey implements BaseProductKey {
+public final class Info implements BaseProductKey {
 
     private String filePath;
     private String fileName;

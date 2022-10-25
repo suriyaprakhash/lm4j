@@ -11,6 +11,7 @@ import java.security.KeyStore;
 import java.util.Map;
 import java.util.Set;
 
+@Deprecated
 public final class LicenseManager extends BaseLicenseManager {
 
     private static LicenseManager licenseManager;
@@ -25,44 +26,44 @@ public final class LicenseManager extends BaseLicenseManager {
     }
 
 
-    private void validateInput(ProductKey productKey) {
+    private void validateInput(Info info) {
 
     }
 
 
-    private void massageInput(ProductKey productKey) {
+    private void massageInput(Info info) {
         // if key password missing, file password is used for key
-        if (productKey.getProductPassword() == null) {
-            productKey.setProductPassword(productKey.getFilePassword());
+        if (info.getProductPassword() == null) {
+            info.setProductPassword(info.getFilePassword());
         }
     }
 
-    public String generate(ProductKey productKey, Map<String, String> attributeMap) {
+    public String generate(Info info, Map<String, String> attributeMap) {
 
-        validateInput(productKey);
+        validateInput(info);
 
-        massageInput(productKey);
+        massageInput(info);
 
         // ProductKeyFile generation
         Key secureProductKey = SymmetricKey.generateSecureRandomKey(productKeyAlgorithm);
         FileProcessor.storeSecretKeyInKeyStore(productKeyFileAlgorithm, secureProductKey, AttributeParser.populateAttributeSetFromMap(attributeMap),
-                productKey.getProductName(), productKey.getProductPassword(),
-                productKey.getFilePath(), productKey.getFileName(), productKey.getFilePassword());
-        return productKey.keyUniqueIdentifier;
+                info.getProductName(), info.getProductPassword(),
+                info.getFilePath(), info.getFileName(), info.getFilePassword());
+        return info.keyUniqueIdentifier;
     }
 
-    public Map<String, String> readAttributeMap(ProductKey productKey, Set<String> attributeMapKeySet) {
-        KeyStore.Entry entry = FileProcessor.readKeyStoreEntryFromKeyStore(productKeyFileAlgorithm, productKey.getProductName(), productKey.getProductPassword(),
-                productKey.getFilePath(), productKey.getFileName(), productKey.getFilePassword());
+    public Map<String, String> readAttributeMap(Info info, Set<String> attributeMapKeySet) {
+        KeyStore.Entry entry = FileProcessor.readKeyStoreEntryFromKeyStore(productKeyFileAlgorithm, info.getProductName(), info.getProductPassword(),
+                info.getFilePath(), info.getFileName(), info.getFilePassword());
         Map<String, String> attributeMap = AttributeParser.populateAttributeMapFromSet(entry.getAttributes(), attributeMapKeySet);
         return attributeMap;
     }
 
 
-    public void sign(ProductKey productKey) {
+    public void sign(Info info) {
         KeyPair keyPair = AsymmetricKey.generateAsymmetricKey(digitalSignatureAlgorithm, SIGNATURE_KEY_SIZE);
         FileProcessor.storeKeyPair(keyPair,
-                productKey.getFilePath(), productKey.getFileName() + "_" + productKey.keyUniqueIdentifier);
+                info.getFilePath(), info.getFileName() + "_" + info.keyUniqueIdentifier);
     }
 
 
