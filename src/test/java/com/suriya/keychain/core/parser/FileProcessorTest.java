@@ -1,4 +1,4 @@
-package com.suriya.keychain.core;
+package com.suriya.keychain.core.parser;
 
 import com.suriya.keychain.core.algorithm.AsymmetricKey;
 import com.suriya.keychain.core.algorithm.SymmetricKey;

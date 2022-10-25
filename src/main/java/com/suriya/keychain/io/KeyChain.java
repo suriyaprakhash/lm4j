@@ -2,9 +2,11 @@ package com.suriya.keychain.io;
 
 import com.suriya.keychain.core.algorithm.AsymmetricKey;
 import com.suriya.keychain.core.algorithm.DigiSign;
+import com.suriya.keychain.core.algorithm.Hash;
 import com.suriya.keychain.core.algorithm.SymmetricKey;
 import com.suriya.keychain.core.parser.AttributeParser;
 import com.suriya.keychain.core.parser.ByteProcessor;
+import com.suriya.keychain.core.parser.Content;
 import com.suriya.license.io.Info;
 
 import java.io.IOException;
@@ -13,96 +15,172 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
+import java.time.Instant;
 import java.util.*;
 
-import static com.suriya.keychain.io.Settings.*;
+import static com.suriya.keychain.io.Settings.General.*;
+import static com.suriya.keychain.io.Settings.Algorithm.*;
 
 public final class KeyChain {
 
-    private Info info;
-    private Map<String, String> informationKeyAttributeMap;
+    private Generator generator;
+    private Verifier verifier;
 
-    private KeyStore keyStore;
-    private PublicKey publicKey;
-    private PrivateKey privateKey;
-    private byte[] signature;
+    public static class Generator {
+        private Info info;
+        private Map<String, String> informationKeyAttributeMap;
+        private Map<String, String> headerMap;
 
-    private KeyChain() {}
+        private KeyStore keyStore;
+        private PublicKey publicKey;
+        private PrivateKey privateKey;
+        private byte[] signature;
 
-    private KeyChain(Info info, Map<String, String> informationKeyAttributeMap) {
-        this.info = info;
-        this.informationKeyAttributeMap = informationKeyAttributeMap;
-    }
+        private Generator() {}
 
-    private static void validateInput(Info info) {
-    }
+        public void deploy() {
+            try {
+                Path keyChainPath = Paths.get(info.getFilePath() + "\\" + info.getFileName() + ".kc");
+                // write key chain
+                Files.write(keyChainPath, get());
+                if (saveGeneratedKeyStore) {
+                    Path generatedKeyStoreFile = Paths.get(info.getFilePath() + "\\" + info.getFileName() + "_ks");
+                    // write key chain
+                    Files.write(generatedKeyStoreFile, getBody());
+                }
+                if (saveGeneratedPrivateKey) {
+                    Path generatedPrivateKey = Paths.get(info.getFilePath() + "\\" + info.getFileName() + "_pk");
+                    // write key chain
+                    Files.write(generatedPrivateKey, getPrivateKey());
+                }
 
-    static class Generator {
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
-    }
+        public byte[] get() {
+           return Content.encode(getHeader(), getBody());
+//            byte[] header = headerMap.toString().getBytes(StandardCharsets.UTF_8);
+//            byte[] keyStoreBody = ByteProcessor.writeKeyStoreIntoByteArray(keyStore, info.getFilePassword());
+//            return keyStoreBody;
+        }
+
+        public byte[] getHeader() {
+            populateDefaultHeader();
+            return headerMap.toString().getBytes(StandardCharsets.UTF_8);
+        }
+
+        public byte[] getBody() {
+            return ByteProcessor.writeKeyStoreIntoByteArray(keyStore, info.getFilePassword());
+        }
+
+        private byte[] getPrivateKey() {
+            return privateKey.getEncoded();
+        }
 
 
+        private void populateDefaultHeader() {
+            if (headerMap == null) {
+                headerMap = new HashMap<>();
+            }
+            headerMap.put("KEY_CHAIN_IDENTIFIER_GEN_TIME", Instant.now().toString());
+        }
 
-    public static KeyChain generate(Info info, Map<String, String> productKeyAttributeMap) {
-        validateInput(info);
-        KeyChain keyChain = new KeyChain(info, productKeyAttributeMap);
-        keyChain.bindSignatureKey(keyChain.bindPublicKey(keyChain.bindProductKey()));
-        return keyChain;
-    }
+        private String bindProductKey() {
+            Key secretProductKey = SymmetricKey.generateSecureRandomKey(secureRandomKeyAlgorithm); //DES HmacSHA1
+            String encodedProductKeyString = Base64.getEncoder().encodeToString(secretProductKey.getEncoded());
+            keyStore = ByteProcessor.keyStoreFromKeyStoreByteArray(null, keyStoreAlgorithm,
+                    info.getFilePassword());
+            ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm, info.getFilePassword(), secretProductKey,
+                    INFO_KEY, info.getProductPassword(),
+                    AttributeParser.populateAttributeSetFromMap(informationKeyAttributeMap));
+            return encodedProductKeyString;
+        }
 
-    public static KeyChain validateInput(Info info, Set<String> productKeyAttributeSet) {
-        KeyChain keyChain = new KeyChain();
-        keyChain.validateProductKey(info, productKeyAttributeSet);
-        return null;
-    }
+        private String bindPublicKey(String encodedProductKeyString) {
+            Key secretPublicKey = SymmetricKey.generateSecureRandomKey(secureRandomKeyAlgorithm);
+            String encodedPublicKeyString = Base64.getEncoder().encodeToString(secretPublicKey.getEncoded());
+            KeyPair keyPair = AsymmetricKey.generateAsymmetricKey(keyPairAlgorithm, keyPairKeySize);
+            privateKey = keyPair.getPrivate();
+            publicKey = keyPair.getPublic();
+            Map<String, String> publicKeyAttributeMap = new HashMap<>();
+            publicKeyAttributeMap.put(PUBLIC_KEY, Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+            ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm, info.getFilePassword(),
+                    secretPublicKey, PUBLIC_KEY, encodedProductKeyString, AttributeParser.populateAttributeSetFromMap(publicKeyAttributeMap));
+            return encodedPublicKeyString;
+        }
 
-    public void deploy() {
-        Path path = Paths.get(info.getFilePath() + "\\" + info.getFileName());
-        try {
-            Files.write(path, get());
-        } catch (IOException e) {
-            e.printStackTrace();
+        private void bindSignatureKey(String encodedPublicKeyString) {
+            String infoKeyUniqueIdentifier = Hash.getHexStringFromByteArray(Hash.generateMessageDigest(messageDigestAlgorithm,
+                    informationKeyAttributeMap.toString()));
+            Key secretSignatureKey = SymmetricKey.generateSecretKeyFromPassword(passwordKeyAlgorithm, infoKeyUniqueIdentifier);
+            signature = DigiSign.sign(signAlgorithm, privateKey, "data to be encrypted".getBytes(StandardCharsets.UTF_8));
+            Map<String, String> signatureAttributeMap = new HashMap<>();
+            signatureAttributeMap.put("signature", Base64.getEncoder().encodeToString(signature));
+
+            ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm, info.getFilePassword(), secretSignatureKey,  SIGNATURE_KEY, encodedPublicKeyString, AttributeParser.populateAttributeSetFromMap(signatureAttributeMap));
         }
     }
 
-    public byte[] get() {
-        return ByteProcessor.writeKeyStoreIntoByteArray(keyStore, info.getFilePassword());
+    private static class Verifier {
+        private Info info;
+        private Set<String> informationKeyAttributeSet;
+
+    }
+
+    private KeyChain() {}
+
+
+    private static void validateInput(Info info, Map<String, String> informationKeyAttributeMap) {
     }
 
 
-    private String bindProductKey() {
-        Key secretProductKey = SymmetricKey.generateSecureRandomKey(secureRandomKeyAlgorithm); //DES HmacSHA1
-        String encodedProductKeyString = Base64.getEncoder().encodeToString(secretProductKey.getEncoded());
-        keyStore = ByteProcessor.keyStoreFromKeyStoreByteArray(null, keyStoreAlgorithm,
-                info.getFilePassword());
-        ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm, info.getFilePassword(), secretProductKey,
-                INFO_KEY, info.getProductPassword(),
-                AttributeParser.populateAttributeSetFromMap(informationKeyAttributeMap));
-        return encodedProductKeyString;
+    public static Generator generate(Info info, Map<String, String> informationKeyAttributeMap) {
+        return generate(info, informationKeyAttributeMap, null);
     }
 
-    private String bindPublicKey(String encodedProductKeyString) {
-        Key secretPublicKey = SymmetricKey.generateSecureRandomKey(secureRandomKeyAlgorithm);
-        String encodedPublicKeyString = Base64.getEncoder().encodeToString(secretPublicKey.getEncoded());
-        KeyPair keyPair = AsymmetricKey.generateAsymmetricKey(keyPairAlgorithm, keyPairKeySize);
-        privateKey = keyPair.getPrivate();
-        publicKey = keyPair.getPublic();
-        Map<String, String> publicKeyAttributeMap = new HashMap<>();
-        publicKeyAttributeMap.put(PUBLIC_KEY, Base64.getEncoder().encodeToString(publicKey.getEncoded()));
-        ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm, info.getFilePassword(),
-                secretPublicKey, PUBLIC_KEY, encodedProductKeyString, AttributeParser.populateAttributeSetFromMap(publicKeyAttributeMap));
-        return encodedPublicKeyString;
+    public static Generator generate(Info info, Map<String, String> informationKeyAttributeMap, Map<String, String> headerMap) {
+        validateInput(info, informationKeyAttributeMap);
+        KeyChain keyChain = new KeyChain();
+        keyChain.generator = new Generator();
+        keyChain.generator.info = info;
+        keyChain.generator.informationKeyAttributeMap = informationKeyAttributeMap;
+        keyChain.generator.headerMap = headerMap;
+        keyChain.generator.bindSignatureKey(keyChain.generator.bindPublicKey(keyChain.generator.bindProductKey()));
+        return keyChain.generator;
     }
 
-    private void bindSignatureKey(String encodedPublicKeyString) {
-        String productKeyUniqueIdentifier = UUID.randomUUID().toString(); // TODO generate hash from productAttributes
-        Key secretSignatureKey = SymmetricKey.generateSecretKeyFromPassword(passwordKeyAlgorithm, productKeyUniqueIdentifier);
-        byte[] signature = DigiSign.sign(signAlgorithmRSA, privateKey, "data to be encrypted".getBytes(StandardCharsets.UTF_8));
-        Map<String, String> signatureAttributeMap = new HashMap<>();
-        signatureAttributeMap.put("signature", Base64.getEncoder().encodeToString(signature));
 
-        ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm, info.getFilePassword(), secretSignatureKey,  SIGNATURE_KEY, encodedPublicKeyString, AttributeParser.populateAttributeSetFromMap(signatureAttributeMap));
-    }
+
+//    public static KeyChain read(Info info, Set<String> productKeyAttributeSet) {
+//
+//    }
+
+
+//    public void deploy() {
+//        if (builder != null) {
+//            builder.deploy();
+//        }
+//    }
+//
+//    public byte[] get() {
+//        byte[] byteArray = null;
+//        if (builder != null) {
+//            byteArray = builder.get();
+//        }
+//        return byteArray;
+//    }
+//
+//    public boolean verify() {
+//
+//        return false;
+//    }
+//
+
+
+
+
 
 
 
