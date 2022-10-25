@@ -1,12 +1,9 @@
-package com.suriya.license.core.parser;
+package com.suriya.keychain.core.parser;
 
 import javax.crypto.SecretKey;
 import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

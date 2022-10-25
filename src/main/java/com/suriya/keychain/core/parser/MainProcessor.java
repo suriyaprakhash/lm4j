@@ -1,4 +1,4 @@
-//package com.suriya.license.core.parser;
+//package com.suriya.keychain.core.parser;
 //
 //import javax.crypto.SecretKey;
 //import java.security.Key;

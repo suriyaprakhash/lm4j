@@ -1,6 +1,5 @@
-package com.suriya.license.core.algorithm;
+package com.suriya.keychain.core.algorithm;
 
-import com.suriya.license.core.algorithm.AsymmetricKey;
 import org.junit.jupiter.api.Test;
 
 import java.security.*;

@@ -1,7 +1,5 @@
-package com.suriya.license.core.algorithm;
+package com.suriya.keychain.core.algorithm;
 
-import com.suriya.license.core.algorithm.MessageAuthenticationCode;
-import com.suriya.license.core.algorithm.SymmetricKey;
 import com.suriya.license.util.ConversionUtility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

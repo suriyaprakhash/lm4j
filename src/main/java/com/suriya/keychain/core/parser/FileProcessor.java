@@ -1,16 +1,11 @@
-package com.suriya.license.core.parser;
-
-import com.suriya.license.util.ConversionUtility;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+package com.suriya.keychain.core.parser;
 
 import javax.crypto.SecretKey;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.spec.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class FileProcessor {
 

@@ -1,9 +1,9 @@
 package com.suriya.license.io;
 
-import com.suriya.license.core.parser.AttributeParser;
-import com.suriya.license.core.parser.FileProcessor;
-import com.suriya.license.core.algorithm.AsymmetricKey;
-import com.suriya.license.core.algorithm.SymmetricKey;
+import com.suriya.keychain.core.parser.AttributeParser;
+import com.suriya.keychain.core.parser.FileProcessor;
+import com.suriya.keychain.core.algorithm.AsymmetricKey;
+import com.suriya.keychain.core.algorithm.SymmetricKey;
 
 import java.security.Key;
 import java.security.KeyPair;

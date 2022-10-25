@@ -1,4 +1,4 @@
-package com.suriya.license.core.parser;
+package com.suriya.keychain.core.parser;
 
 import com.suriya.license.util.ConversionUtility;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;

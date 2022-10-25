@@ -1,4 +1,4 @@
-package com.suriya.license.core.algorithm;
+package com.suriya.keychain.core.algorithm;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;

@@ -1,10 +1,11 @@
-package com.suriya.license.io;
+package com.suriya.keychain.io;
 
-import com.suriya.license.core.algorithm.AsymmetricKey;
-import com.suriya.license.core.algorithm.DigiSign;
-import com.suriya.license.core.algorithm.SymmetricKey;
-import com.suriya.license.core.parser.AttributeParser;
-import com.suriya.license.core.parser.ByteProcessor;
+import com.suriya.keychain.core.algorithm.AsymmetricKey;
+import com.suriya.keychain.core.algorithm.DigiSign;
+import com.suriya.keychain.core.algorithm.SymmetricKey;
+import com.suriya.keychain.core.parser.AttributeParser;
+import com.suriya.keychain.core.parser.ByteProcessor;
+import com.suriya.license.io.Info;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -14,7 +15,7 @@ import java.nio.file.Paths;
 import java.security.*;
 import java.util.*;
 
-import static com.suriya.license.io.Settings.*;
+import static com.suriya.keychain.io.Settings.*;
 
 public final class KeyChain {
 
@@ -33,17 +34,23 @@ public final class KeyChain {
         this.informationKeyAttributeMap = informationKeyAttributeMap;
     }
 
-    private static void validate(Info info) {
+    private static void validateInput(Info info) {
     }
 
+    static class Generator {
+
+    }
+
+
+
     public static KeyChain generate(Info info, Map<String, String> productKeyAttributeMap) {
-        validate(info);
+        validateInput(info);
         KeyChain keyChain = new KeyChain(info, productKeyAttributeMap);
         keyChain.bindSignatureKey(keyChain.bindPublicKey(keyChain.bindProductKey()));
         return keyChain;
     }
 
-    public static KeyChain validate(Info info, Set<String> productKeyAttributeSet) {
+    public static KeyChain validateInput(Info info, Set<String> productKeyAttributeSet) {
         KeyChain keyChain = new KeyChain();
         keyChain.validateProductKey(info, productKeyAttributeSet);
         return null;
@@ -61,6 +68,7 @@ public final class KeyChain {
     public byte[] get() {
         return ByteProcessor.writeKeyStoreIntoByteArray(keyStore, info.getFilePassword());
     }
+
 
     private String bindProductKey() {
         Key secretProductKey = SymmetricKey.generateSecureRandomKey(secureRandomKeyAlgorithm); //DES HmacSHA1

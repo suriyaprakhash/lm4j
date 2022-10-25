@@ -1,6 +1,5 @@
-package com.suriya.license.core;
+package com.suriya.keychain.core;
 
-import javax.crypto.Mac;
 import java.security.*;
 import java.util.Set;
 import java.util.TreeSet;

@@ -1,4 +1,4 @@
-package com.suriya.license.core;
+package com.suriya.keychain.core;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

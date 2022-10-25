@@ -1,5 +1,8 @@
-package com.suriya.license.io;
+package com.suriya.keychain.io;
 
+import com.suriya.keychain.io.KeyChain;
+import com.suriya.keychain.io.Settings;
+import com.suriya.license.io.Info;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -22,7 +25,7 @@ public class KeyChainTest {
         productKeyAttributeMap.put("dod", "deliveryDate");
         productKeyAttributeMap.put("dope", "prodExpDate");
 
-        Settings.setInfoKey("mydataKey");
+        Settings.setInfoKey("deltadataKey");
 
         Info info = new Info();
         info.setProductName(productName);

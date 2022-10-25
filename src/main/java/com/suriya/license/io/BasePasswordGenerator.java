@@ -1,6 +1,6 @@
 package com.suriya.license.io;
 
-import com.suriya.license.core.algorithm.Hash;
+import com.suriya.keychain.core.algorithm.Hash;
 import com.suriya.license.util.ConversionUtility;
 
 import java.util.List;

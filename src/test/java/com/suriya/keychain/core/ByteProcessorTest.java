@@ -1,10 +1,10 @@
-package com.suriya.license.core;
+package com.suriya.keychain.core;
 
-import com.suriya.license.core.algorithm.AsymmetricKey;
-import com.suriya.license.core.algorithm.DigiSign;
-import com.suriya.license.core.algorithm.SymmetricKey;
-import com.suriya.license.core.parser.AttributeParser;
-import com.suriya.license.core.parser.ByteProcessor;
+import com.suriya.keychain.core.algorithm.AsymmetricKey;
+import com.suriya.keychain.core.algorithm.DigiSign;
+import com.suriya.keychain.core.algorithm.SymmetricKey;
+import com.suriya.keychain.core.parser.AttributeParser;
+import com.suriya.keychain.core.parser.ByteProcessor;
 import com.suriya.license.io.Info;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

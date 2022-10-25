@@ -1,4 +1,4 @@
-package com.suriya.license.core.algorithm;
+package com.suriya.keychain.core.algorithm;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

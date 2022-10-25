@@ -1,4 +1,4 @@
-package com.suriya.license.io;
+package com.suriya.keychain.io;
 
 public abstract class Settings {
     static String keyStoreAlgorithm = "PKCS12";
