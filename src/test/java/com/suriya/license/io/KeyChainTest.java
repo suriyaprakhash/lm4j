@@ -22,6 +22,8 @@ public class KeyChainTest {
         productKeyAttributeMap.put("dod", "deliveryDate");
         productKeyAttributeMap.put("dope", "prodExpDate");
 
+        Settings.setInfoKey("mydataKey");
+
         Info info = new Info();
         info.setProductName(productName);
         info.setProductPassword(productPassword);

@@ -14,7 +14,9 @@ import java.nio.file.Paths;
 import java.security.*;
 import java.util.*;
 
-public final class KeyChain implements AlgorithmDefaults {
+import static com.suriya.license.io.Settings.*;
+
+public final class KeyChain {
 
     private Info info;
     private Map<String, String> informationKeyAttributeMap;
