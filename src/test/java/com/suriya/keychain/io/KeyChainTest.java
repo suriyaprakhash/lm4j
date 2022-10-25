@@ -1,12 +1,12 @@
 package com.suriya.keychain.io;
 
-import com.suriya.keychain.core.Support;
 import com.suriya.license.io.Info;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class KeyChainTest {
 
@@ -25,8 +25,12 @@ public class KeyChainTest {
         productKeyAttributeMap.put("dod", "deliveryDate");
         productKeyAttributeMap.put("dope", "prodExpDate");
 
+
+
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put("generator", "keyChain");
+        headerMap.put("testValue1", "testValue1Ans");
+        headerMap.put("testValue2", "testValue2Ans");
 
         Settings.General.INFO_KEY = "deltadataKey";
         Settings.General.saveGeneratedKeyStore = true;
@@ -42,9 +46,15 @@ public class KeyChainTest {
         KeyChain.Generator generator = KeyChain.generate(info, productKeyAttributeMap, headerMap);
         generator.deploy();
 
-//        System.out.println(keyChain.get());
-//        System.out.println(keyChain.get().length);
-//        keyChain.deploy();
+        System.out.println(generator.getHeader().length);
+        System.out.println(generator.getBody().length);
+
+
+        /////////////////////////////////////////////////////////////
+
+        Set<String> productKeyAttributeSet = productKeyAttributeMap.keySet();
+
+        boolean verified = KeyChain.verify(info, productKeyAttributeSet);
 
 
     }

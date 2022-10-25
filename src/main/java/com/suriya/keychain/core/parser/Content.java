@@ -12,9 +12,6 @@ public class Content {
     //////// 8 byte
     //////// x byte
 
-//    static int determinedHeaderLengthStoreByteCapacity = 4;
-//    static int headerByteCapacity = 256;
-
     public enum Type {
         HEADER,
         BODY;

@@ -140,7 +140,6 @@ public class ByteProcessor {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             keyStore.store(out, keyStorePassword.toCharArray());
             keyStoreByteArray = new byte[out.size()];
-            System.out.println(out.size());
             keyStoreByteArray = out.toByteArray();
             out.close();
         } catch (CertificateException e) {

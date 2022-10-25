@@ -1,5 +1,6 @@
 package com.suriya.keychain.io;
 
+import com.suriya.keychain.core.ChainValidator;
 import com.suriya.keychain.core.algorithm.AsymmetricKey;
 import com.suriya.keychain.core.algorithm.DigiSign;
 import com.suriya.keychain.core.algorithm.Hash;
@@ -26,9 +27,29 @@ public final class KeyChain {
     private Generator generator;
     private Verifier verifier;
 
+    private KeyChain() {}
+
+    private static void validateInput(Info info, Map<String, String> infoKeyAttributeMap) {
+    }
+
+    public static Generator generate(Info info, Map<String, String> infoKeyAttributeMap) {
+        return generate(info, infoKeyAttributeMap, null);
+    }
+
+    public static Generator generate(Info info, Map<String, String> informationKeyAttributeMap, Map<String, String> headerMap) {
+        validateInput(info, informationKeyAttributeMap);
+        KeyChain keyChain = new KeyChain();
+        keyChain.generator = new Generator();
+        keyChain.generator.info = info;
+        keyChain.generator.infoKeyAttributeMap = informationKeyAttributeMap;
+        keyChain.generator.headerMap = headerMap;
+        keyChain.generator.bindSignatureKey(keyChain.generator.bindPublicKey(keyChain.generator.bindProductKey()));
+        return keyChain.generator;
+    }
+
     public static class Generator {
         private Info info;
-        private Map<String, String> informationKeyAttributeMap;
+        private Map<String, String> infoKeyAttributeMap;
         private Map<String, String> headerMap;
 
         private KeyStore keyStore;
@@ -61,9 +82,6 @@ public final class KeyChain {
 
         public byte[] get() {
            return Content.encode(getHeader(), getBody());
-//            byte[] header = headerMap.toString().getBytes(StandardCharsets.UTF_8);
-//            byte[] keyStoreBody = ByteProcessor.writeKeyStoreIntoByteArray(keyStore, info.getFilePassword());
-//            return keyStoreBody;
         }
 
         public byte[] getHeader() {
@@ -94,7 +112,7 @@ public final class KeyChain {
                     info.getFilePassword());
             ByteProcessor.storeSecretKeyInKeyStore(keyStore, keyStoreAlgorithm, info.getFilePassword(), secretProductKey,
                     INFO_KEY, info.getProductPassword(),
-                    AttributeParser.populateAttributeSetFromMap(informationKeyAttributeMap));
+                    AttributeParser.populateAttributeSetFromMap(infoKeyAttributeMap));
             return encodedProductKeyString;
         }
 
@@ -113,9 +131,10 @@ public final class KeyChain {
 
         private void bindSignatureKey(String encodedPublicKeyString) {
             String infoKeyUniqueIdentifier = Hash.getHexStringFromByteArray(Hash.generateMessageDigest(messageDigestAlgorithm,
-                    informationKeyAttributeMap.toString()));
+                    infoKeyAttributeMap.toString()));
             Key secretSignatureKey = SymmetricKey.generateSecretKeyFromPassword(passwordKeyAlgorithm, infoKeyUniqueIdentifier);
-            signature = DigiSign.sign(signAlgorithm, privateKey, "data to be encrypted".getBytes(StandardCharsets.UTF_8));
+            signature = DigiSign.sign(signAlgorithm, privateKey, (Base64.getEncoder().encodeToString(publicKey.getEncoded())
+                    + infoKeyUniqueIdentifier).getBytes(StandardCharsets.UTF_8));
             Map<String, String> signatureAttributeMap = new HashMap<>();
             signatureAttributeMap.put("signature", Base64.getEncoder().encodeToString(signature));
 
@@ -123,60 +142,55 @@ public final class KeyChain {
         }
     }
 
-    private static class Verifier {
-        private Info info;
-        private Set<String> informationKeyAttributeSet;
+    private static final class Verifier {
+
+        private ChainValidator chainValidator;
+
+        private Verifier(Info info, Set<String> infoKeyAttributeSet) {
+            ChainValidator chainValidator = new ChainValidator();
+            chainValidator.setInfo(info);
+            chainValidator.setInfoKeyAttributeSet(infoKeyAttributeSet);
+            this.chainValidator = chainValidator;
+        }
+
+        private byte[] get() {
+            byte[] fileByteArray = null;
+            try {
+             fileByteArray = Files.readAllBytes(Path.of(chainValidator.getInfo().getFilePath() + "//" + chainValidator
+                     .getInfo().getFileName() + ".kc"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return fileByteArray;
+        }
+
+        private byte[] getHeader() {
+            return Content.decode(get(), Content.Type.HEADER);
+        }
+
+        private byte[] getBody() {
+            return Content.decode(get(), Content.Type.BODY);
+        }
+
+        private boolean verify() {
+            // READ
+            KeyStore keyStore = ByteProcessor.readKeyStoreFromByteArray(getBody(), keyStoreAlgorithm, chainValidator
+                    .getInfo().getFilePassword());
+            String uuid = chainValidator.validate(keyStore);
+            return false;
+        }
+
+
 
     }
 
-    private KeyChain() {}
-
-
-    private static void validateInput(Info info, Map<String, String> informationKeyAttributeMap) {
-    }
-
-
-    public static Generator generate(Info info, Map<String, String> informationKeyAttributeMap) {
-        return generate(info, informationKeyAttributeMap, null);
-    }
-
-    public static Generator generate(Info info, Map<String, String> informationKeyAttributeMap, Map<String, String> headerMap) {
-        validateInput(info, informationKeyAttributeMap);
-        KeyChain keyChain = new KeyChain();
-        keyChain.generator = new Generator();
-        keyChain.generator.info = info;
-        keyChain.generator.informationKeyAttributeMap = informationKeyAttributeMap;
-        keyChain.generator.headerMap = headerMap;
-        keyChain.generator.bindSignatureKey(keyChain.generator.bindPublicKey(keyChain.generator.bindProductKey()));
-        return keyChain.generator;
+    public static boolean verify(Info info, Set<String> infoKeyAttributeSet) {
+        Verifier verifier = new Verifier(info, infoKeyAttributeSet);
+        return verifier.verify();
     }
 
 
 
-//    public static KeyChain read(Info info, Set<String> productKeyAttributeSet) {
-//
-//    }
-
-
-//    public void deploy() {
-//        if (builder != null) {
-//            builder.deploy();
-//        }
-//    }
-//
-//    public byte[] get() {
-//        byte[] byteArray = null;
-//        if (builder != null) {
-//            byteArray = builder.get();
-//        }
-//        return byteArray;
-//    }
-//
-//    public boolean verify() {
-//
-//        return false;
-//    }
-//
 
 
 
@@ -184,8 +198,12 @@ public final class KeyChain {
 
 
 
-    private boolean validateProductKey(Info info, Set<String> productKeyAttributeSet) {
 
-        return false;
-    }
+
+
+
+
+
+
+
 }
