@@ -20,7 +20,7 @@ public final class SymmetricKey {
         Key key = null;
         try {
             //Creating a KeyGenerator object
-            KeyGenerator keyGen = KeyGenerator.getInstance(algorithm); // "DES"
+            KeyGenerator keyGen = KeyGenerator.getInstance(algorithm);
 
             //Creating a SecureRandom object
             SecureRandom secRandom = new SecureRandom();

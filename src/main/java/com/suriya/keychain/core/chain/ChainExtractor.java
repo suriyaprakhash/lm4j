@@ -1,6 +1,7 @@
 package com.suriya.keychain.core.chain;
 
 
+import com.suriya.keychain.core.algorithm.DigiSign;
 import com.suriya.keychain.core.algorithm.Hash;
 import com.suriya.keychain.core.algorithm.SymmetricKey;
 import com.suriya.keychain.core.parser.AttributeParser;
@@ -17,10 +18,10 @@ import java.util.Set;
 import static com.suriya.keychain.io.Settings.Algorithm.*;
 import static com.suriya.keychain.io.Settings.General.*;
 
-public final class ContentExtractor extends Extractor {
+public final class ChainExtractor extends Extractor {
 
-    public ContentExtractor(ValidationHolder validationHolder) {
-        super(validationHolder);
+    public ChainExtractor(ExtractorStorage extractorStorage) {
+        super(extractorStorage);
     }
 
     public String extract(KeyStore keyStore) {
@@ -28,16 +29,16 @@ public final class ContentExtractor extends Extractor {
     }
 
     public String validateInfoKey(KeyStore keyStore) {
-        KeyStore.Entry secretInfoKeyEntry = ByteProcessor.readKeyStoreEntryOfSecretKeyFromKeyStore(keyStore, INFO_KEY, validationHolder.info.getProductPassword());
-        validationHolder.infoKeyAttributeMap = AttributeParser.populateAttributeMapFromSet(secretInfoKeyEntry.getAttributes(), validationHolder.infoKeyAttributeSet);
-        Key secretInfoKey =  ByteProcessor.readSecretKeyFromKeyStore(keyStore, INFO_KEY, validationHolder.info.getProductPassword());
+        KeyStore.Entry secretInfoKeyEntry = ByteProcessor.readKeyStoreEntryOfSecretKeyFromKeyStore(keyStore, INFO_KEY, extractorStorage.info.getProductPassword());
+        extractorStorage.infoKeyAttributeMap = AttributeParser.populateAttributeMapFromSet(secretInfoKeyEntry.getAttributes(), extractorStorage.infoKeyAttributeSet);
+        Key secretInfoKey =  ByteProcessor.readSecretKeyFromKeyStore(keyStore, INFO_KEY, extractorStorage.info.getProductPassword());
         return  Base64.getEncoder().encodeToString(secretInfoKey.getEncoded());
     }
 
     public String validatePublicKey(KeyStore keyStore, String encodedInfoKeyString) {
         KeyStore.Entry secretPublicKeyEntry = ByteProcessor.readKeyStoreEntryOfSecretKeyFromKeyStore(keyStore, PUBLIC_KEY, encodedInfoKeyString);
 
-        validationHolder.publicKey = extractPublicKey(secretPublicKeyEntry);
+        extractorStorage.publicKey = extractPublicKey(secretPublicKeyEntry);
 
         Key secretPublicKey = ByteProcessor.readSecretKeyFromKeyStore(keyStore, PUBLIC_KEY, encodedInfoKeyString);
         return Base64.getEncoder().encodeToString(secretPublicKey.getEncoded());
@@ -47,10 +48,10 @@ public final class ContentExtractor extends Extractor {
         KeyStore.Entry secretSignatureKeyEntry = ByteProcessor.readKeyStoreEntryOfSecretKeyFromKeyStore(keyStore, SIGNATURE_KEY, encodedInfoKeyString);
         Key secretSignatureKeyRead = ByteProcessor.readSecretKeyFromKeyStore(keyStore, SIGNATURE_KEY, encodedInfoKeyString);
 
-        validationHolder.signature = extractSignature(secretSignatureKeyEntry);
+        extractorStorage.signature = extractSignature(secretSignatureKeyEntry);
 
         String infoKeyUniqueIdentifier = Hash.getHexStringFromByteArray(Hash.generateMessageDigest(messageDigestAlgorithm,
-                validationHolder.infoKeyAttributeMap.toString()));
+                extractorStorage.infoKeyAttributeMap.toString()));
         Key secretSignatureKeyReGenerated = SymmetricKey.generateSecretKeyFromPassword(passwordKeyAlgorithm, infoKeyUniqueIdentifier);
 
         return Base64.getEncoder().encodeToString(secretSignatureKeyRead.getEncoded());
@@ -81,6 +82,8 @@ public final class ContentExtractor extends Extractor {
         return Base64.getDecoder().decode(AttributeParser.populateAttributeMapFromSet(secretSignatureKeyEntry.getAttributes(),
                 signatureKeyAttributeSetRead).get(SIGNATURE_KEY));
     }
+
+
 
 
 }

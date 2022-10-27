@@ -52,6 +52,7 @@ public class ByteProcessor {
 
             //Creating SecretKeyEntry object
             KeyStore.SecretKeyEntry secretKeyEntry = null;
+
             if (attributeSet != null) {
                 secretKeyEntry = new KeyStore.SecretKeyEntry((SecretKey) key, attributeSet);
             } else {

@@ -2,13 +2,13 @@ package com.suriya.keychain.core.chain;
 
 public class Extractor {
 
-    protected ValidationHolder validationHolder;
+    protected ExtractorStorage extractorStorage;
 
-    public ValidationHolder getValidationHolder() {
-        return validationHolder;
+    public ExtractorStorage getValidationHolder() {
+        return extractorStorage;
     }
 
-    Extractor(ValidationHolder validationHolder) {
-        this.validationHolder = validationHolder;
+    Extractor(ExtractorStorage extractorStorage) {
+        this.extractorStorage = extractorStorage;
     }
 }

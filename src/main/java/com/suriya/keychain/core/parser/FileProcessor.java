@@ -10,48 +10,52 @@ import java.util.*;
 public class FileProcessor {
 
 
-
-
-//
-//    public static void storeSecretKey(String algorithm, Key key, String secretEntryAliasName,
-//                                      String keyStoreFolderPath, String keyStoreName, String keyStorePass) {
-//        storeSecretKey(algorithm, key, null, secretEntryAliasName,
-//                keyStoreFolderPath, keyStoreName, keyStorePass);
-//    }
-
+    /**
+     * This method stores the keystore into the file system
+     *
+     * @param keyStoreAlgorithm - algorithm for the key store
+     * @param key - the key itself
+     * @param attributeSet - set of attributes to be added as part of the key entry
+     * @param secretEntryAliasName - alias name for the key
+     * @param secretPassword - password for the key
+     * @param keyStoreFolderPath - file system path to store the keystore
+     * @param keyStoreName - filename of the keystore file to be saved
+     * @param keyStorePassword - password to be used for accessing the key store
+     */
     public static void storeSecretKeyInKeyStore(String keyStoreAlgorithm, Key key,
                                                 Set<KeyStore.Entry.Attribute> attributeSet,
                                                 String secretEntryAliasName, String secretPassword,
                                                 String keyStoreFolderPath, String keyStoreName,
                                                 String keyStorePassword) {
         try {
-            //Creating the KeyStore object
+            // getting the algorithm
             KeyStore keyStore = KeyStore.getInstance(keyStoreAlgorithm);  //JCEKS PKCS12
 
-            //Loading the KeyStore object
             char[] keyStorePassCharArray = keyStorePassword.toCharArray(); // changeit
             char[] secretEntryPassCharArray = secretPassword.toCharArray();
-//            String path = "C:/Program Files/Java/jre1.8.0_101/lib/security/cacerts";
-//            java.io.FileInputStream fis = new FileInputStream(keyStoreFolderPath);
-//            keyStore.load(fis, keyStorePassCharArray);
+
+            // initializing the empty stream for new keystore / existing keystore would need inputStream
             keyStore.load(null, keyStorePassCharArray);
 
-            //Creating the KeyStore.ProtectionParameter object
+            // the protection param is used to protect the secret entry
             KeyStore.ProtectionParameter protectionParam = new KeyStore.PasswordProtection(secretEntryPassCharArray);
 
-            //Creating SecretKeyEntry object
             KeyStore.SecretKeyEntry secretKeyEntry = null;
+
             if (attributeSet != null) {
                 secretKeyEntry = new KeyStore.SecretKeyEntry((SecretKey) key, attributeSet);
             } else {
                 secretKeyEntry = new KeyStore.SecretKeyEntry((SecretKey) key);
             }
+
+            // adding the entry to the keystore
             keyStore.setEntry(secretEntryAliasName, secretKeyEntry, protectionParam); //"secretKeyAlias"
 
             //Storing the KeyStore object
             File file = new File(keyStoreFolderPath+"//"+keyStoreName);
             java.io.FileOutputStream fos = new java.io.FileOutputStream(file);
             keyStore.store(fos, keyStorePassCharArray);
+
             System.out.println("data stored");
 
         } catch (KeyStoreException e) {

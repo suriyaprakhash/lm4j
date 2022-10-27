@@ -5,11 +5,12 @@ import com.suriya.license.io.Info;
 import java.util.Map;
 import java.util.Set;
 
-public class Holder {
+public class Storage {
 
     protected Info info;
     protected Set<String> infoKeyAttributeSet;
     protected Map<String, String> infoKeyAttributeMap;
+    protected Map<String, String> headerMap;
 
     public Info getInfo() {
         return info;
@@ -33,5 +34,13 @@ public class Holder {
 
     public void setInfoKeyAttributeMap(Map<String, String> infoKeyAttributeMap) {
         this.infoKeyAttributeMap = infoKeyAttributeMap;
+    }
+
+    public Map<String, String> getHeaderMap() {
+        return headerMap;
+    }
+
+    public void setHeaderMap(Map<String, String> headerMap) {
+        this.headerMap = headerMap;
     }
 }
